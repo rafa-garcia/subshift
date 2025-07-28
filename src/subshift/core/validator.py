@@ -4,6 +4,15 @@ import tempfile
 from datetime import timedelta
 from pathlib import Path
 
+from ..config import (
+    BYTES_PER_MB,
+    ERROR_MESSAGES,
+    FILE_ENCODING,
+    MAX_FILE_SIZE_BYTES,
+    MAX_OFFSET_MS,
+    TEMP_FILE_SUFFIX,
+    VALID_SRT_EXTENSIONS,
+)
 from .exceptions import (
     FileProcessingError,
     InvalidOffsetError,
@@ -41,21 +50,21 @@ class FileValidator:
 
     @staticmethod
     def check_file_warnings(file_path):
-        if file_path.suffix.lower() != ".srt":
+        if file_path.suffix.lower() not in [ext.lower() for ext in VALID_SRT_EXTENSIONS]:
             print(f"Warning: Input file does not have .srt extension: {file_path}")
 
         file_size = file_path.stat().st_size
-        if file_size > 10 * 1024 * 1024:
-            print(f"Warning: Large file detected ({file_size / (1024 * 1024):.1f}MB)")
+        if file_size > MAX_FILE_SIZE_BYTES:
+            print(f"Warning: Large file detected ({file_size / BYTES_PER_MB:.1f}MB)")
 
     @staticmethod
     def read_srt_file(file_path):
         try:
-            with open(file_path, encoding="utf-8") as f:
+            with open(file_path, encoding=FILE_ENCODING) as f:
                 content = f.read()
             return SRTFile.from_content(content)
         except UnicodeDecodeError as e:
-            raise InvalidSRTFormatError("File is not valid UTF-8 text") from e
+            raise InvalidSRTFormatError(ERROR_MESSAGES["invalid_utf8"]) from e
         except OSError as e:
             raise FileProcessingError(f"Error reading input file: {e}") from e
 
@@ -66,7 +75,11 @@ class FileValidator:
 
         try:
             with tempfile.NamedTemporaryFile(
-                mode="w", encoding="utf-8", delete=False, suffix=".srt.tmp", dir=parent_dir
+                mode="w",
+                encoding=FILE_ENCODING,
+                delete=False,
+                suffix=TEMP_FILE_SUFFIX,
+                dir=parent_dir,
             ) as temp_file:
                 temp_path = Path(temp_file.name)
                 temp_file.write(srt_file.to_content())
@@ -88,7 +101,7 @@ class FileValidator:
         except (ValueError, TypeError) as e:
             raise InvalidOffsetError(f"Offset must be a number: {e}") from e
 
-        if abs(offset_int) > 86400000:
+        if abs(offset_int) > MAX_OFFSET_MS:
             raise InvalidOffsetError(f"Offset too large (max ±24 hours): {offset_int}ms")
 
         return timedelta(milliseconds=offset_int)

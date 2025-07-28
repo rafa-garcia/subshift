@@ -1,6 +1,7 @@
 import re
 from dataclasses import dataclass
 
+from ..config import SRT_TIMING_LINE_PATTERN
 from .exceptions import InvalidSRTFormatError
 from .timestamp import SRTTimestamp
 
@@ -33,9 +34,7 @@ class SRTSubtitle:
         except ValueError as e:
             raise InvalidSRTFormatError(f"Invalid subtitle number: {lines[0]}") from e
 
-        timing_match = re.match(
-            r"^(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})\s*$", lines[1]
-        )
+        timing_match = re.match(SRT_TIMING_LINE_PATTERN, lines[1])
         if not timing_match:
             raise InvalidSRTFormatError(f"Invalid timing format: {lines[1]}")
 

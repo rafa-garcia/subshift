@@ -2,6 +2,7 @@ import re
 from dataclasses import dataclass
 from datetime import timedelta
 
+from ..config import SRT_TIMESTAMP_PATTERN
 from .exceptions import InvalidTimestampError
 
 
@@ -26,7 +27,7 @@ class SRTTimestamp:
 
     @classmethod
     def from_string(cls, timestamp_str):
-        if not re.match(r"^\d{2}:\d{2}:\d{2},\d{3}$", timestamp_str):
+        if not re.match(SRT_TIMESTAMP_PATTERN, timestamp_str):
             raise InvalidTimestampError(f"Invalid timestamp format: {timestamp_str}")
 
         try:
