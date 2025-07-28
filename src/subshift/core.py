@@ -1,15 +1,15 @@
-import re
 import os
-import tempfile
+import re
 import shutil
+import tempfile
 from datetime import timedelta
 from pathlib import Path
 
 from .exceptions import (
-    InvalidTimestampError,
     FileProcessingError,
-    InvalidSRTFormatError,
     InvalidOffsetError,
+    InvalidSRTFormatError,
+    InvalidTimestampError,
 )
 
 
@@ -34,12 +34,10 @@ def parse_timestamp(ts):
         ):
             raise InvalidTimestampError(f"Timestamp values out of range: {ts}")
 
-        return timedelta(
-            hours=hours, minutes=minutes, seconds=seconds, milliseconds=milliseconds
-        )
+        return timedelta(hours=hours, minutes=minutes, seconds=seconds, milliseconds=milliseconds)
 
     except ValueError as e:
-        raise InvalidTimestampError(f"Could not parse timestamp '{ts}': {e}")
+        raise InvalidTimestampError(f"Could not parse timestamp '{ts}': {e}") from e
 
 
 def format_timestamp(td):
@@ -58,6 +56,36 @@ def format_timestamp(td):
     return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
 
 
+def _validate_srt_format(file_path):
+    """Quick validation that file looks like an SRT file."""
+    try:
+        with open(file_path, encoding="utf-8") as f:
+            # Read first few lines to check basic SRT structure
+            lines = []
+            for i, line in enumerate(f):
+                lines.append(line.strip())
+                if i >= 10:  # Check first 10 lines
+                    break
+
+            if not lines:
+                raise InvalidSRTFormatError("File is empty")
+
+            # Look for at least one timestamp line
+            timestamp_found = False
+            for line in lines:
+                if re.match(r"^\d{2}:\d{2}:\d{2},\d{3} --> \d{2}:\d{2}:\d{2},\d{3}$", line):
+                    timestamp_found = True
+                    break
+
+            if not timestamp_found:
+                raise InvalidSRTFormatError("No valid SRT timestamp format found in file")
+
+    except UnicodeDecodeError as e:
+        raise InvalidSRTFormatError("File is not valid UTF-8 text") from e
+    except OSError as e:
+        raise FileProcessingError(f"Cannot read file for validation: {e}") from e
+
+
 def shift_srt(input_file, output_file, offset_ms):
     # Validate input file
     input_path = Path(input_file)
@@ -68,6 +96,18 @@ def shift_srt(input_file, output_file, offset_ms):
     if not os.access(input_path, os.R_OK):
         raise FileProcessingError(f"Input file is not readable: {input_path}")
 
+    # Check file extension
+    if input_path.suffix.lower() != ".srt":
+        print(f"Warning: Input file does not have .srt extension: {input_path}")
+
+    # Validate file size (warn if > 10MB)
+    file_size = input_path.stat().st_size
+    if file_size > 10 * 1024 * 1024:
+        print(f"Warning: Large file detected ({file_size / (1024 * 1024):.1f}MB)")
+
+    # Validate SRT format
+    _validate_srt_format(input_path)
+
     # Validate output location
     output_path = Path(output_file)
     parent_dir = output_path.parent
@@ -75,7 +115,7 @@ def shift_srt(input_file, output_file, offset_ms):
         try:
             parent_dir.mkdir(parents=True, exist_ok=True)
         except Exception as e:
-            raise FileProcessingError(f"Cannot create output directory: {e}")
+            raise FileProcessingError(f"Cannot create output directory: {e}") from e
 
     if not os.access(parent_dir, os.W_OK):
         raise FileProcessingError(f"Output directory is not writable: {parent_dir}")
@@ -84,7 +124,7 @@ def shift_srt(input_file, output_file, offset_ms):
     try:
         offset_int = int(offset_ms)
     except (ValueError, TypeError) as e:
-        raise InvalidOffsetError(f"Offset must be a number: {e}")
+        raise InvalidOffsetError(f"Offset must be a number: {e}") from e
 
     if abs(offset_int) > 86400000:  # 24 hours in ms
         raise InvalidOffsetError(f"Offset too large (max ±24 hours): {offset_int}ms")
@@ -101,7 +141,7 @@ def shift_srt(input_file, output_file, offset_ms):
             temp_path = Path(temp_file.name)
 
             try:
-                with open(input_path, "r", encoding="utf-8") as input_f:
+                with open(input_path, encoding="utf-8") as input_f:
                     for line_num, line in enumerate(input_f, 1):
                         match = re.match(
                             r"^(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})\s*$",
@@ -127,14 +167,14 @@ def shift_srt(input_file, output_file, offset_ms):
                             except InvalidTimestampError as e:
                                 raise InvalidSRTFormatError(
                                     f"Invalid timestamp on line {line_num}: {e}"
-                                )
+                                ) from e
                         else:
                             temp_file.write(line)
 
             except UnicodeDecodeError as e:
-                raise FileProcessingError(f"Could not decode input file as UTF-8: {e}")
-            except IOError as e:
-                raise FileProcessingError(f"Error reading input file: {e}")
+                raise FileProcessingError(f"Could not decode input file as UTF-8: {e}") from e
+            except OSError as e:
+                raise FileProcessingError(f"Error reading input file: {e}") from e
 
         if subtitle_count == 0:
             raise InvalidSRTFormatError("No valid subtitle timestamps found")
@@ -143,9 +183,9 @@ def shift_srt(input_file, output_file, offset_ms):
         try:
             shutil.move(str(temp_path), str(output_path))
         except Exception as e:
-            raise FileProcessingError(f"Error writing output file: {e}")
+            raise FileProcessingError(f"Error writing output file: {e}") from e
 
-    except Exception as e:
+    except Exception:
         # Clean up temp file on error
         if temp_file and Path(temp_file.name).exists():
             try:

@@ -1,12 +1,13 @@
 import argparse
 import sys
+
 from .core import shift_srt
 from .exceptions import (
-    SubshiftError,
-    InvalidTimestampError,
     FileProcessingError,
-    InvalidSRTFormatError,
     InvalidOffsetError,
+    InvalidSRTFormatError,
+    InvalidTimestampError,
+    SubshiftError,
 )
 
 
@@ -28,9 +29,7 @@ def main():
         required=True,
         help="Offset in milliseconds (e.g., -24000 for 24 seconds earlier)",
     )
-    parser.add_argument(
-        "--output", "-o", help="Output .srt file (default: overwrites input file)"
-    )
+    parser.add_argument("--output", "-o", help="Output .srt file (default: overwrites input file)")
     parser.add_argument(
         "--backup",
         "-b",
