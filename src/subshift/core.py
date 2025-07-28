@@ -15,22 +15,29 @@ from .exceptions import (
 
 def parse_timestamp(ts):
     try:
-        if not re.match(r'^\d{2}:\d{2}:\d{2},\d{3}$', ts):
+        if not re.match(r"^\d{2}:\d{2}:\d{2},\d{3}$", ts):
             raise InvalidTimestampError(f"Invalid timestamp format: {ts}")
-        
+
         h, m, s_ms = ts.split(":")
         s, ms = s_ms.split(",")
-        
+
         hours = int(h)
         minutes = int(m)
         seconds = int(s)
         milliseconds = int(ms)
-        
-        if not (0 <= hours <= 99 and 0 <= minutes <= 59 and 0 <= seconds <= 59 and 0 <= milliseconds <= 999):
+
+        if not (
+            0 <= hours <= 99
+            and 0 <= minutes <= 59
+            and 0 <= seconds <= 59
+            and 0 <= milliseconds <= 999
+        ):
             raise InvalidTimestampError(f"Timestamp values out of range: {ts}")
-        
-        return timedelta(hours=hours, minutes=minutes, seconds=seconds, milliseconds=milliseconds)
-        
+
+        return timedelta(
+            hours=hours, minutes=minutes, seconds=seconds, milliseconds=milliseconds
+        )
+
     except ValueError as e:
         raise InvalidTimestampError(f"Could not parse timestamp '{ts}': {e}")
 
@@ -38,16 +45,16 @@ def parse_timestamp(ts):
 def format_timestamp(td):
     if td.total_seconds() < 0:
         raise InvalidTimestampError("Cannot format negative timestamp")
-    
+
     total_seconds = int(td.total_seconds())
     ms = int(td.microseconds / 1000)
     h = total_seconds // 3600
     m = (total_seconds % 3600) // 60
     s = total_seconds % 60
-    
+
     if h > 99:
         raise InvalidTimestampError(f"Hours exceed SRT format limit: {h}")
-    
+
     return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
 
 
@@ -60,7 +67,7 @@ def shift_srt(input_file, output_file, offset_ms):
         raise FileProcessingError(f"Input path is not a file: {input_path}")
     if not os.access(input_path, os.R_OK):
         raise FileProcessingError(f"Input file is not readable: {input_path}")
-    
+
     # Validate output location
     output_path = Path(output_file)
     parent_dir = output_path.parent
@@ -69,67 +76,75 @@ def shift_srt(input_file, output_file, offset_ms):
             parent_dir.mkdir(parents=True, exist_ok=True)
         except Exception as e:
             raise FileProcessingError(f"Cannot create output directory: {e}")
-    
+
     if not os.access(parent_dir, os.W_OK):
         raise FileProcessingError(f"Output directory is not writable: {parent_dir}")
-    
+
     # Validate offset
     try:
         offset_int = int(offset_ms)
     except (ValueError, TypeError) as e:
         raise InvalidOffsetError(f"Offset must be a number: {e}")
-    
+
     if abs(offset_int) > 86400000:  # 24 hours in ms
         raise InvalidOffsetError(f"Offset too large (max ±24 hours): {offset_int}ms")
-    
+
     offset = timedelta(milliseconds=offset_int)
     subtitle_count = 0
     temp_file = None
-    
+
     try:
         # Use temporary file for atomic write
-        with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', delete=False,
-                                       suffix='.srt.tmp', dir=parent_dir) as temp_file:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", delete=False, suffix=".srt.tmp", dir=parent_dir
+        ) as temp_file:
             temp_path = Path(temp_file.name)
-            
+
             try:
-                with open(input_path, 'r', encoding='utf-8') as input_f:
+                with open(input_path, "r", encoding="utf-8") as input_f:
                     for line_num, line in enumerate(input_f, 1):
-                        match = re.match(r'^(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})\s*$', line)
+                        match = re.match(
+                            r"^(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})\s*$",
+                            line,
+                        )
                         if match:
                             subtitle_count += 1
                             try:
                                 start_str, end_str = match.groups()
                                 start = parse_timestamp(start_str) + offset
                                 end = parse_timestamp(end_str) + offset
-                                
+
                                 start = max(start, timedelta(0))
                                 end = max(end, timedelta(0))
-                                
+
                                 if end < start:
                                     end = start
-                                
-                                temp_file.write(f"{format_timestamp(start)} --> {format_timestamp(end)}\n")
-                                
+
+                                temp_file.write(
+                                    f"{format_timestamp(start)} --> {format_timestamp(end)}\n"
+                                )
+
                             except InvalidTimestampError as e:
-                                raise InvalidSRTFormatError(f"Invalid timestamp on line {line_num}: {e}")
+                                raise InvalidSRTFormatError(
+                                    f"Invalid timestamp on line {line_num}: {e}"
+                                )
                         else:
                             temp_file.write(line)
-            
+
             except UnicodeDecodeError as e:
                 raise FileProcessingError(f"Could not decode input file as UTF-8: {e}")
             except IOError as e:
                 raise FileProcessingError(f"Error reading input file: {e}")
-        
+
         if subtitle_count == 0:
             raise InvalidSRTFormatError("No valid subtitle timestamps found")
-        
+
         # Atomically move temp file to final location
         try:
             shutil.move(str(temp_path), str(output_path))
         except Exception as e:
             raise FileProcessingError(f"Error writing output file: {e}")
-            
+
     except Exception as e:
         # Clean up temp file on error
         if temp_file and Path(temp_file.name).exists():
@@ -138,5 +153,5 @@ def shift_srt(input_file, output_file, offset_ms):
             except Exception:
                 pass
         raise
-    
+
     print(f"Successfully processed {subtitle_count} subtitles")
