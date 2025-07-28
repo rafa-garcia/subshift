@@ -26,13 +26,15 @@ def parse_timestamp(ts):
         seconds = int(s)
         milliseconds = int(ms)
 
-        if not (
-            0 <= hours <= 99
-            and 0 <= minutes <= 59
-            and 0 <= seconds <= 59
-            and 0 <= milliseconds <= 999
-        ):
-            raise InvalidTimestampError(f"Timestamp values out of range: {ts}")
+        # Validate ranges
+        if not (0 <= hours <= 99):
+            raise InvalidTimestampError(f"Hours must be 0-99, got {hours}")
+        if not (0 <= minutes <= 59):
+            raise InvalidTimestampError(f"Minutes must be 0-59, got {minutes}")
+        if not (0 <= seconds <= 59):
+            raise InvalidTimestampError(f"Seconds must be 0-59, got {seconds}")
+        if not (0 <= milliseconds <= 999):
+            raise InvalidTimestampError(f"Milliseconds must be 0-999, got {milliseconds}")
 
         return timedelta(hours=hours, minutes=minutes, seconds=seconds, milliseconds=milliseconds)
 
@@ -41,8 +43,11 @@ def parse_timestamp(ts):
 
 
 def format_timestamp(td):
+    if not isinstance(td, timedelta):
+        raise InvalidTimestampError(f"Expected timedelta, got {type(td)}")
+
     if td.total_seconds() < 0:
-        raise InvalidTimestampError("Cannot format negative timestamp")
+        raise InvalidTimestampError("Cannot format negative timedelta")
 
     total_seconds = int(td.total_seconds())
     ms = int(td.microseconds / 1000)
@@ -57,7 +62,7 @@ def format_timestamp(td):
 
 
 def _validate_srt_format(file_path):
-    """Quick validation that file looks like an SRT file."""
+    """Validate that a file looks like an SRT file."""
     try:
         with open(file_path, encoding="utf-8") as f:
             # Read first few lines to check basic SRT structure
