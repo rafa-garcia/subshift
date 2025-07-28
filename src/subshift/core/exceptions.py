@@ -1,6 +1,3 @@
-"""Custom exceptions for subshift."""
-
-
 class SubshiftError(Exception):
     """Base exception for all subshift errors."""
 

@@ -1,64 +1,74 @@
-import argparse
 import sys
+from argparse import ArgumentParser
+from pathlib import Path
 
-from .core import shift_srt
-from .exceptions import (
+from .core.exceptions import (
     FileProcessingError,
     InvalidOffsetError,
     InvalidSRTFormatError,
     InvalidTimestampError,
     SubshiftError,
 )
+from .core.workflow import SubtitleProcessor
+
+
+def create_parser():
+    parser = ArgumentParser(
+        prog="subshift",
+        description="Shift SRT subtitle timestamps by a specified offset",
+        epilog="Examples:\n"
+        "  subshift input.srt --offset 2000 --output output.srt  # Shift forward 2 seconds\n"
+        "  subshift input.srt -o -1500 --backup                  # Shift back 1.5s with backup\n"
+        "  subshift input.srt -o 500                             # Shift forward 0.5s in-place",
+        formatter_class=ArgumentParser().formatter_class,
+    )
+
+    parser.add_argument("input_file", help="Input SRT file path")
+
+    parser.add_argument(
+        "-o",
+        "--offset",
+        type=int,
+        required=True,
+        help="Time offset in milliseconds (positive=forward, negative=backward)",
+    )
+
+    parser.add_argument("--output", help="Output file path (default: modify input file in-place)")
+
+    parser.add_argument(
+        "-b",
+        "--backup",
+        action="store_true",
+        help="Create backup of input file before modification",
+    )
+
+    parser.add_argument("--version", action="version", version="%(prog)s 0.1.0")
+
+    return parser
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Shift subtitle timings in milliseconds.",
-        epilog="Examples:\n"
-        "  subshift input.srt --offset -24000 --output output.srt\n"
-        "  subshift input.srt -o output.srt --offset -5000\n"
-        "  subshift input.srt --offset +2000  # overwrites input file",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
-
-    parser.add_argument("input", help="Input .srt file")
-    parser.add_argument(
-        "--offset",
-        "-s",
-        type=int,
-        required=True,
-        help="Offset in milliseconds (e.g., -24000 for 24 seconds earlier)",
-    )
-    parser.add_argument("--output", "-o", help="Output .srt file (default: overwrites input file)")
-    parser.add_argument(
-        "--backup",
-        "-b",
-        action="store_true",
-        help="Create backup of input file before processing",
-    )
-
-    args = parser.parse_args()
-
-    # Set output file default
-    if not args.output:
-        args.output = args.input
+    parser = create_parser()
 
     try:
-        # Create backup if requested
-        if args.backup:
-            import shutil
-            from pathlib import Path
+        args = parser.parse_args()
 
-            backup_path = Path(args.input).with_suffix(".srt.backup")
-            shutil.copy2(args.input, backup_path)
-            print(f"Backup created: {backup_path}")
+        input_path = Path(args.input_file)
+        output_path = Path(args.output) if args.output else input_path
 
-        shift_srt(args.input, args.output, args.offset)
+        processor = SubtitleProcessor()
 
-        if args.output == args.input:
-            print(f"Subtitles shifted by {args.offset} ms in-place")
+        processor.shift_srt_file(
+            input_path=input_path,
+            output_path=output_path,
+            offset_ms=args.offset,
+            create_backup=args.backup,
+        )
+
+        if args.output:
+            print(f"Shifted timestamps by {args.offset}ms and saved to {args.output}")
         else:
-            print(f"Subtitles shifted by {args.offset} ms and saved to {args.output}")
+            print(f"Shifted timestamps by {args.offset}ms in-place")
 
     except FileProcessingError as e:
         print(f"File error: {e}", file=sys.stderr)
@@ -87,3 +97,7 @@ def main():
     except Exception as e:
         print(f"Unexpected error: {e}", file=sys.stderr)
         sys.exit(99)
+
+
+if __name__ == "__main__":
+    main()

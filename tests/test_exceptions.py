@@ -1,6 +1,6 @@
 import pytest
 
-from subshift.exceptions import (
+from subshift.core.exceptions import (
     FileProcessingError,
     InvalidOffsetError,
     InvalidSRTFormatError,
