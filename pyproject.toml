@@ -1,0 +1,15 @@
+[project]
+name = "subshift"
+version = "0.1.0"
+description = "Shift SRT subtitle timings with ease"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Your Name", email = "your@email.com" }]
+dependencies = []
+
+[project.scripts]
+subshift = "subshift.cli:main"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
