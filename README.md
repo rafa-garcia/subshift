@@ -1,6 +1,7 @@
 # subtune
 
 [![Tests](https://github.com/rafa-garcia/subtune/actions/workflows/test.yml/badge.svg)](https://github.com/rafa-garcia/subtune/actions/workflows/test.yml)
+[![Release](https://github.com/rafa-garcia/subtune/actions/workflows/release.yml/badge.svg)](https://github.com/rafa-garcia/subtune/actions/workflows/release.yml)
 
 A CLI tool for adjusting SRT subtitle timestamps with precision and safety.
 
@@ -12,7 +13,12 @@ A CLI tool for adjusting SRT subtitle timestamps with precision and safety.
 
 ## Installation
 
-Iinstall from source:
+Install from PyPI:
+```bash
+pip install subtune
+```
+
+Or install from source:
 ```bash
 git clone https://github.com/rafa-garcia/subtune.git
 cd subtune

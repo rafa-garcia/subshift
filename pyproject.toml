@@ -1,11 +1,37 @@
 [project]
 name = "subtune"
-version = "0.1.0"
-description = "Shift SRT subtitle timings with ease"
+version = "1.0.0"
+description = "Tune SRT subtitle timings with ease"
 readme = "README.md"
 license = { text = "MIT" }
 authors = [{ name = "Rafa Garcia", email = "rafa@rafagarcia.info" }]
+maintainers = [{ name = "Rafa Garcia", email = "rafa@rafagarcia.info" }]
+keywords = ["subtitle", "srt", "timing", "video", "sync", "shift", "cli"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Text Processing :: General",
+    "Topic :: Utilities",
+    "Typing :: Typed",
+]
+requires-python = ">=3.9"
 dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/rafa-garcia/subtune"
+Repository = "https://github.com/rafa-garcia/subtune.git"
+Issues = "https://github.com/rafa-garcia/subtune/issues"
+Changelog = "https://github.com/rafa-garcia/subtune/releases"
 
 [project.optional-dependencies]
 test = [
@@ -17,13 +43,18 @@ dev = [
     "pytest-cov>=4.0.0",
     "ruff>=0.1.0",
 ]
+build = [
+    "build>=0.10.0",
+    "twine>=4.0.0",
+    "hatchling>=1.0.0",
+]
 
 [project.scripts]
 subtune = "subtune.cli:main"
 
 [build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.ruff]
 line-length = 100
