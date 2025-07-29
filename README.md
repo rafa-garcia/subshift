@@ -1,6 +1,12 @@
 # subshift
 
-A simple CLI tool to shift `.srt` subtitle timings by a given offset in milliseconds.
+A CLI tool for adjusting SRT subtitle timestamps with precision and safety.
+
+## Features
+
+- **Precise timing adjustment** - Shift subtitles by milliseconds
+- **Safe operations** - Optional backup creation before modifications  
+- **Robust validation** - Input validation with helpful error messages
 
 ## Installation
 
@@ -10,12 +16,31 @@ pip install .
 
 ## Usage
 
+### Basic Usage
 ```bash
-subshift input.srt -24000 output.srt
+# Shift subtitles 2 seconds later
+subshift input.srt --offset 2000 output.srt
+
+# Shift subtitles 1.5 seconds earlier  
+subshift input.srt --offset -1500 output.srt
 ```
 
-This will shift subtitles **24 seconds earlier**.
+### Advanced Options
+```bash
+# Modify in-place with backup
+subshift input.srt --offset 1000 --backup
+
+# Short flags
+subshift input.srt -o 1000 -b
+```
+
+## Development
+
+### Running Tests
+```bash
+PYTHONPATH=src python -m pytest
+```
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+MIT License - see [LICENSE](LICENSE) file for details.
