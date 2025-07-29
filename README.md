@@ -1,5 +1,7 @@
 # subshift
 
+[![Tests](https://github.com/rafa-garcia/subshift/actions/workflows/test.yml/badge.svg)](https://github.com/rafagarcia/subshift/actions/workflows/test.yml)
+
 A CLI tool for adjusting SRT subtitle timestamps with precision and safety.
 
 ## Features
@@ -10,7 +12,10 @@ A CLI tool for adjusting SRT subtitle timestamps with precision and safety.
 
 ## Installation
 
+Install from source:
 ```bash
+git clone https://github.com/rafagarcia/subshift.git
+cd subshift
 pip install .
 ```
 
@@ -44,3 +49,4 @@ PYTHONPATH=src python -m pytest
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
+
