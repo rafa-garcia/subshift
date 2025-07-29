@@ -1,6 +1,6 @@
-# subshift
+# subtune
 
-[![Tests](https://github.com/rafa-garcia/subshift/actions/workflows/test.yml/badge.svg)](https://github.com/rafa-garcia/subshift/actions/workflows/test.yml)
+[![Tests](https://github.com/rafa-garcia/subtune/actions/workflows/test.yml/badge.svg)](https://github.com/rafa-garcia/subtune/actions/workflows/test.yml)
 
 A CLI tool for adjusting SRT subtitle timestamps with precision and safety.
 
@@ -14,8 +14,8 @@ A CLI tool for adjusting SRT subtitle timestamps with precision and safety.
 
 Iinstall from source:
 ```bash
-git clone https://github.com/rafa-garcia/subshift.git
-cd subshift
+git clone https://github.com/rafa-garcia/subtune.git
+cd subtune
 pip install .
 ```
 
@@ -24,25 +24,25 @@ pip install .
 ### Basic Usage
 ```bash
 # Shift subtitles 2 seconds later
-subshift input.srt --offset 2000 output.srt
+subtune input.srt --offset 2000 output.srt
 
 # Shift subtitles 1.5 seconds earlier  
-subshift input.srt --offset -1500 output.srt
+subtune input.srt --offset -1500 output.srt
 ```
 
 ### Advanced Options
 ```bash
 # Modify in-place with backup
-subshift input.srt --offset 1000 --backup
+subtune input.srt --offset 1000 --backup
 
 # Short flags
-subshift input.srt -o 1000 -b
+subtune input.srt -o 1000 -b
 ```
 
 ### Command Reference
 ```
-$ subshift --help
-usage: subshift [-h] -o OFFSET [--output OUTPUT] [-b] [--version] input_file
+$ subtune --help
+usage: subtune [-h] -o OFFSET [--output OUTPUT] [-b] [--version] input_file
 
 Shift SRT subtitle timestamps by a specified offset
 
@@ -76,10 +76,10 @@ pytest -v
 pytest tests/test_cli.py
 
 # Run tests with coverage
-pytest --cov=src/subshift
+pytest --cov=src/subtune
 
 # Generate HTML coverage report
-pytest --cov=src/subshift --cov-report=html
+pytest --cov=src/subtune --cov-report=html
 open htmlcov/index.html
 
 # Check code quality

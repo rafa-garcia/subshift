@@ -3,20 +3,20 @@ from unittest.mock import patch
 
 import pytest
 
-from subshift.cli import main
-from subshift.core.exceptions import (
+from subtune.cli import main
+from subtune.core.exceptions import (
     FileProcessingError,
     InvalidOffsetError,
     InvalidSRTFormatError,
     InvalidTimestampError,
-    SubshiftError,
+    SubtuneError,
 )
 
 
 class TestCLIArgumentParsing:
     def test_basic_arguments(self):
-        with patch("sys.argv", ["subshift", "input.srt", "--offset", "1000"]):
-            with patch("subshift.core.workflow.SubtitleProcessor.shift_srt_file") as mock_shift:
+        with patch("sys.argv", ["subtune", "input.srt", "--offset", "1000"]):
+            with patch("subtune.core.workflow.SubtitleProcessor.shift_srt_file") as mock_shift:
                 with patch("builtins.print"):
                     mock_shift.return_value = 5
                     main()
@@ -29,9 +29,9 @@ class TestCLIArgumentParsing:
 
     def test_output_argument(self):
         with patch(
-            "sys.argv", ["subshift", "input.srt", "--offset", "1000", "--output", "output.srt"]
+            "sys.argv", ["subtune", "input.srt", "--offset", "1000", "--output", "output.srt"]
         ):
-            with patch("subshift.core.workflow.SubtitleProcessor.shift_srt_file") as mock_shift:
+            with patch("subtune.core.workflow.SubtitleProcessor.shift_srt_file") as mock_shift:
                 with patch("builtins.print"):
                     mock_shift.return_value = 5
                     main()
@@ -43,8 +43,8 @@ class TestCLIArgumentParsing:
                 assert call_kwargs["create_backup"] is False
 
     def test_short_flags(self):
-        with patch("sys.argv", ["subshift", "input.srt", "-o", "2000", "--output", "out.srt"]):
-            with patch("subshift.core.workflow.SubtitleProcessor.shift_srt_file") as mock_shift:
+        with patch("sys.argv", ["subtune", "input.srt", "-o", "2000", "--output", "out.srt"]):
+            with patch("subtune.core.workflow.SubtitleProcessor.shift_srt_file") as mock_shift:
                 with patch("builtins.print"):
                     mock_shift.return_value = 5
                     main()
@@ -56,12 +56,12 @@ class TestCLIArgumentParsing:
                 assert call_kwargs["create_backup"] is False
 
     def test_missing_offset_argument(self):
-        with patch("sys.argv", ["subshift", "input.srt"]):
+        with patch("sys.argv", ["subtune", "input.srt"]):
             with pytest.raises(SystemExit):
                 main()
 
     def test_help_argument(self):
-        with patch("sys.argv", ["subshift", "--help"]):
+        with patch("sys.argv", ["subtune", "--help"]):
             with pytest.raises(SystemExit) as exc_info:
                 main()
             assert exc_info.value.code == 0  # Help should exit with code 0
@@ -69,8 +69,8 @@ class TestCLIArgumentParsing:
 
 class TestCLIBackupFunctionality:
     def test_backup_flag(self):
-        with patch("sys.argv", ["subshift", "input.srt", "--offset", "1000", "--backup"]):
-            with patch("subshift.core.workflow.SubtitleProcessor.shift_srt_file") as mock_shift:
+        with patch("sys.argv", ["subtune", "input.srt", "--offset", "1000", "--backup"]):
+            with patch("subtune.core.workflow.SubtitleProcessor.shift_srt_file") as mock_shift:
                 with patch("builtins.print"):
                     mock_shift.return_value = 5
                     main()
@@ -79,8 +79,8 @@ class TestCLIBackupFunctionality:
                 assert call_kwargs["create_backup"] is True
 
     def test_no_backup_by_default(self):
-        with patch("sys.argv", ["subshift", "input.srt", "--offset", "1000"]):
-            with patch("subshift.core.workflow.SubtitleProcessor.shift_srt_file") as mock_shift:
+        with patch("sys.argv", ["subtune", "input.srt", "--offset", "1000"]):
+            with patch("subtune.core.workflow.SubtitleProcessor.shift_srt_file") as mock_shift:
                 with patch("builtins.print"):
                     mock_shift.return_value = 5
                     main()
@@ -97,16 +97,16 @@ class TestCLIErrorHandling:
             (InvalidSRTFormatError("Bad format"), 2, "SRT format error: Bad format"),
             (InvalidTimestampError("Bad timestamp"), 3, "Timestamp error: Bad timestamp"),
             (InvalidOffsetError("Bad offset"), 4, "Offset error: Bad offset"),
-            (SubshiftError("Generic error"), 5, "Error: Generic error"),
+            (SubtuneError("Generic error"), 5, "Error: Generic error"),
             (KeyboardInterrupt(), 130, "\nOperation cancelled by user"),
             (RuntimeError("Unexpected"), 99, "Unexpected error: Unexpected"),
         ],
     )
     @patch("builtins.print")
     def test_error_handling(self, mock_print, exception, exit_code, error_message):
-        with patch("sys.argv", ["subshift", "input.srt", "--offset", "1000"]):
+        with patch("sys.argv", ["subtune", "input.srt", "--offset", "1000"]):
             with patch(
-                "subshift.core.workflow.SubtitleProcessor.shift_srt_file", side_effect=exception
+                "subtune.core.workflow.SubtitleProcessor.shift_srt_file", side_effect=exception
             ):
                 with pytest.raises(SystemExit) as exc_info:
                     main()
@@ -116,12 +116,12 @@ class TestCLIErrorHandling:
 
 
 class TestCLISuccessMessages:
-    @patch("subshift.core.workflow.SubtitleProcessor.shift_srt_file")
+    @patch("subtune.core.workflow.SubtitleProcessor.shift_srt_file")
     @patch("builtins.print")
     def test_success_message_different_output(self, mock_print, mock_shift):
         mock_shift.return_value = 5
         with patch(
-            "sys.argv", ["subshift", "input.srt", "--offset", "1000", "--output", "output.srt"]
+            "sys.argv", ["subtune", "input.srt", "--offset", "1000", "--output", "output.srt"]
         ):
             main()
 
@@ -134,11 +134,11 @@ class TestCLISuccessMessages:
             for call in success_calls
         )
 
-    @patch("subshift.core.workflow.SubtitleProcessor.shift_srt_file")
+    @patch("subtune.core.workflow.SubtitleProcessor.shift_srt_file")
     @patch("builtins.print")
     def test_success_message_in_place(self, mock_print, mock_shift):
         mock_shift.return_value = 5
-        with patch("sys.argv", ["subshift", "input.srt", "--offset", "1000"]):
+        with patch("sys.argv", ["subtune", "input.srt", "--offset", "1000"]):
             main()
 
         # Check success message
@@ -158,7 +158,7 @@ class TestCLIIntegration:
         # Run CLI
         with patch(
             "sys.argv",
-            ["subshift", str(input_file), "--offset", "1000", "--output", str(output_file)],
+            ["subtune", str(input_file), "--offset", "1000", "--output", str(output_file)],
         ):
             with patch("builtins.print"):
                 main()
@@ -176,7 +176,7 @@ class TestCLIIntegration:
         input_file.write_text(original_content)
 
         # Run CLI with backup
-        with patch("sys.argv", ["subshift", str(input_file), "--offset", "1000", "--backup"]):
+        with patch("sys.argv", ["subtune", str(input_file), "--offset", "1000", "--backup"]):
             with patch("builtins.print"):
                 main()
 

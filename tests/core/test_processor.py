@@ -2,9 +2,9 @@ from datetime import timedelta
 
 import pytest
 
-from subshift.core.exceptions import InvalidSRTFormatError
-from subshift.core.processor import SRTFile, SRTSubtitle
-from subshift.core.timestamp import SRTTimestamp
+from subtune.core.exceptions import InvalidSRTFormatError
+from subtune.core.processor import SRTFile, SRTSubtitle
+from subtune.core.timestamp import SRTTimestamp
 
 
 class TestSRTSubtitle:

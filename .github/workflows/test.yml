@@ -28,7 +28,7 @@ jobs:
     
     - name: Run tests
       run: |
-        python -m pytest -v --tb=short --cov=src/subshift --cov-report=xml
+        python -m pytest -v --tb=short --cov=src/subtune --cov-report=xml
     
     - name: Check code quality
       run: |

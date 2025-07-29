@@ -2,8 +2,8 @@ from datetime import timedelta
 
 import pytest
 
-from subshift.core.exceptions import InvalidTimestampError
-from subshift.core.timestamp import SRTTimestamp
+from subtune.core.exceptions import InvalidTimestampError
+from subtune.core.timestamp import SRTTimestamp
 
 
 class TestSRTTimestamp:

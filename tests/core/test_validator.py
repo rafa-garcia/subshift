@@ -4,14 +4,14 @@ from unittest.mock import patch
 
 import pytest
 
-from subshift.core.exceptions import (
+from subtune.core.exceptions import (
     FileProcessingError,
     InvalidOffsetError,
     InvalidSRTFormatError,
 )
-from subshift.core.processor import SRTFile, SRTSubtitle
-from subshift.core.timestamp import SRTTimestamp
-from subshift.core.validator import FileValidator
+from subtune.core.processor import SRTFile, SRTSubtitle
+from subtune.core.timestamp import SRTTimestamp
+from subtune.core.validator import FileValidator
 
 
 class TestFileValidator:

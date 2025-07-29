@@ -1,13 +1,13 @@
 import pytest
 
-from subshift.core.exceptions import (
+from subtune.core.exceptions import (
     FileProcessingError,
     InvalidOffsetError,
     InvalidSRTFormatError,
 )
-from subshift.core.validator import FileValidator
-from subshift.core.workflow import SubtitleProcessor
-from subshift.utils.backup import BackupManager
+from subtune.core.validator import FileValidator
+from subtune.core.workflow import SubtitleProcessor
+from subtune.utils.backup import BackupManager
 
 
 class TestSubtitleProcessor:

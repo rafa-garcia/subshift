@@ -1,4 +1,4 @@
-"""Configuration constants for subshift application."""
+"""Configuration constants for subtune application."""
 
 # File validation settings
 MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024  # 10MB warning threshold

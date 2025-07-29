@@ -1,5 +1,5 @@
 [project]
-name = "subshift"
+name = "subtune"
 version = "0.1.0"
 description = "Shift SRT subtitle timings with ease"
 readme = "README.md"
@@ -19,7 +19,7 @@ dev = [
 ]
 
 [project.scripts]
-subshift = "subshift.cli:main"
+subtune = "subtune.cli:main"
 
 [build-system]
 requires = ["setuptools"]

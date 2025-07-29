@@ -1,11 +1,11 @@
 import pytest
 
-from subshift.core.exceptions import (
+from subtune.core.exceptions import (
     FileProcessingError,
     InvalidOffsetError,
     InvalidSRTFormatError,
     InvalidTimestampError,
-    SubshiftError,
+    SubtuneError,
 )
 
 
@@ -19,16 +19,16 @@ class TestExceptionHierarchy:
             InvalidOffsetError,
         ],
     )
-    def test_all_exceptions_inherit_from_subshift_error(self, exc_class):
-        assert issubclass(exc_class, SubshiftError)
+    def test_all_exceptions_inherit_from_subtune_error(self, exc_class):
+        assert issubclass(exc_class, SubtuneError)
 
-    def test_subshift_error_inherits_from_exception(self):
-        assert issubclass(SubshiftError, Exception)
+    def test_subtune_error_inherits_from_exception(self):
+        assert issubclass(SubtuneError, Exception)
 
     @pytest.mark.parametrize(
         "exc_class",
         [
-            SubshiftError,
+            SubtuneError,
             InvalidTimestampError,
             FileProcessingError,
             InvalidSRTFormatError,
@@ -43,7 +43,7 @@ class TestExceptionInstantiation:
     @pytest.mark.parametrize(
         "exc_class,message",
         [
-            (SubshiftError, "Test error"),
+            (SubtuneError, "Test error"),
             (InvalidTimestampError, "Invalid timestamp"),
             (FileProcessingError, "File error"),
             (InvalidSRTFormatError, "Format error"),
@@ -56,7 +56,7 @@ class TestExceptionInstantiation:
 
     def test_exceptions_without_message(self):
         for exc_class in [
-            SubshiftError,
+            SubtuneError,
             InvalidTimestampError,
             FileProcessingError,
             InvalidSRTFormatError,
@@ -70,7 +70,7 @@ class TestExceptionRaising:
     @pytest.mark.parametrize(
         "exc_class,message",
         [
-            (SubshiftError, "Base error"),
+            (SubtuneError, "Base error"),
             (InvalidTimestampError, "Bad timestamp"),
             (FileProcessingError, "File issue"),
             (InvalidSRTFormatError, "Format issue"),
@@ -92,14 +92,14 @@ class TestExceptionCatching:
             InvalidOffsetError,
         ],
     )
-    def test_catch_specific_exceptions_as_subshift_error(self, exc_class):
-        with pytest.raises(SubshiftError):
+    def test_catch_specific_exceptions_as_subtune_error(self, exc_class):
+        with pytest.raises(SubtuneError):
             raise exc_class("Test error")
 
     @pytest.mark.parametrize(
         "exc_class",
         [
-            SubshiftError,
+            SubtuneError,
             InvalidTimestampError,
             FileProcessingError,
             InvalidSRTFormatError,

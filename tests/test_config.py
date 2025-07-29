@@ -1,4 +1,4 @@
-from subshift.config import (
+from subtune.config import (
     BACKUP_SUFFIX,
     BYTES_PER_MB,
     ERROR_MESSAGES,

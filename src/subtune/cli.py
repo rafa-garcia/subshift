@@ -7,19 +7,19 @@ from .core.exceptions import (
     InvalidOffsetError,
     InvalidSRTFormatError,
     InvalidTimestampError,
-    SubshiftError,
+    SubtuneError,
 )
 from .core.workflow import SubtitleProcessor
 
 
 def create_parser():
     parser = ArgumentParser(
-        prog="subshift",
+        prog="subtune",
         description="Shift SRT subtitle timestamps by a specified offset",
         epilog="Examples:\n"
-        "  subshift input.srt --offset 2000 --output output.srt  # Shift forward 2 seconds\n"
-        "  subshift input.srt -o -1500 --backup                  # Shift back 1.5s with backup\n"
-        "  subshift input.srt -o 500                             # Shift forward 0.5s in-place",
+        "  subtune input.srt --offset 2000 --output output.srt  # Shift forward 2 seconds\n"
+        "  subtune input.srt -o -1500 --backup                  # Shift back 1.5s with backup\n"
+        "  subtune input.srt -o 500                             # Shift forward 0.5s in-place",
         formatter_class=ArgumentParser().formatter_class,
     )
 
@@ -86,7 +86,7 @@ def main():
         print(f"Offset error: {e}", file=sys.stderr)
         sys.exit(4)
 
-    except SubshiftError as e:
+    except SubtuneError as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(5)
 
